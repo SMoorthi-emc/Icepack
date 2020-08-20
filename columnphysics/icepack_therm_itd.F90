@@ -200,6 +200,8 @@
 
       character(len=*),parameter :: subname='(linear_itd)'
 
+      real (kind=dbl_kind) :: wrk
+
       !-----------------------------------------------------------------
       ! Initialize
       !-----------------------------------------------------------------
@@ -304,15 +306,20 @@
 
       do n = 1, ncat-1
 
-         if (hicen_init(n)   > puny .and. &
-             hicen_init(n+1) > puny) then
+         if (hicen_init(n)   > puny) then
+           if (hicen_init(n+1) > puny) then
              ! interpolate between adjacent category growth rates
-             slope = (dhicen(n+1) - dhicen(n)) / &
-                 (hicen_init(n+1) - hicen_init(n))
+             wrk = hicen_init(n+1) - hicen_init(n)
+             if (wrk > puny) then
+               slope = (dhicen(n+1) - dhicen(n)) / wrk
+             else
+               slope = c0
+             endif
              hbnew(n) = hin_max(n) + dhicen(n) &
                       + slope * (hin_max(n) - hicen_init(n))
-         elseif (hicen_init(n) > puny) then ! hicen_init(n+1)=0
+           else
              hbnew(n) = hin_max(n) + dhicen(n)
+           endif
          elseif (hicen_init(n+1) > puny) then ! hicen_init(n)=0
              hbnew(n) = hin_max(n) + dhicen(n+1)
          else

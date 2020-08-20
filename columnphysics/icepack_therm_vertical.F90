@@ -2638,6 +2638,8 @@
       ! Aerosol update
       !-----------------------------------------------------------------
 
+            if (aicen(n) <= puny) aicen(n) = c0
+
             if (tr_aero) then
                call update_aerosol (dt,                             &
                                     nilyr, nslyr, n_aero,           &
