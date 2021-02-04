@@ -145,6 +145,7 @@
 
       real (kind=dbl_kind) :: &
          slope        , & ! rate of change of dhice with hice
+         denom        , & ! denominator in hbnew calculation
          dh0          , & ! change in ice thickness at h = 0
          da0          , & ! area melting from category 1
          damax        , & ! max allowed reduction in category 1 area
@@ -199,8 +200,6 @@
          print_diags = .false.    ! if true, prints when remap_flag=F
 
       character(len=*),parameter :: subname='(linear_itd)'
-
-      real (kind=dbl_kind) :: wrk
 
       !-----------------------------------------------------------------
       ! Initialize
@@ -306,20 +305,15 @@
 
       do n = 1, ncat-1
 
-         if (hicen_init(n)   > puny) then
-           if (hicen_init(n+1) > puny) then
+         if (hicen_init(n)   > puny .and. &
+             hicen_init(n+1) > puny) then
              ! interpolate between adjacent category growth rates
-             wrk = hicen_init(n+1) - hicen_init(n)
-             if (wrk > puny) then
-               slope = (dhicen(n+1) - dhicen(n)) / wrk
-             else
-               slope = c0
-             endif
+             denom = max(puny,hicen_init(n+1) - hicen_init(n))
+             slope = (dhicen(n+1) - dhicen(n)) / denom
              hbnew(n) = hin_max(n) + dhicen(n) &
                       + slope * (hin_max(n) - hicen_init(n))
-           else
+         elseif (hicen_init(n) > puny) then ! hicen_init(n+1)=0
              hbnew(n) = hin_max(n) + dhicen(n)
-           endif
          elseif (hicen_init(n+1) > puny) then ! hicen_init(n)=0
              hbnew(n) = hin_max(n) + dhicen(n+1)
          else
