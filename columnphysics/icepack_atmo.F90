@@ -247,7 +247,7 @@
       
       thva = potT * (c1 + zvir * Qa) ! virtual pot temp (K)
       delq = Qa - ssq          ! spec hum dif (kg/kg)
-      alz  = log(zlvl/zref)
+      alz  = log(max(zlvl,1.0)/zref)
       cp   = cp_air*(c1 + cpvir*ssq)
       
       !------------------------------------------------------------
